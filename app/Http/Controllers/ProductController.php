@@ -2,12 +2,18 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Controllers\Traits\ImagesTrait;
+use App\Http\Requests\ProductRequest;
+use App\Models\Category;
+use App\Models\Product;
 use Illuminate\Http\Request;
 
 use App\Http\Requests;
 
 class ProductController extends Controller
 {
+    use ImagesTrait;
+
     /**
      * Display a listing of the resource.
      *
@@ -15,7 +21,9 @@ class ProductController extends Controller
      */
     public function index()
     {
-        return view('pages.products.list');
+        $products = Product::all();
+
+        return view('pages.products.list', compact('products'));
     }
 
     /**
@@ -25,18 +33,29 @@ class ProductController extends Controller
      */
     public function create()
     {
-        return view('pages.products.create');
+        $categories = Category::all()->pluck('name', 'id');
+
+        return view('pages.products.create', compact('categories'));
     }
 
     /**
      * Store a newly created resource in storage.
      *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
+     * @param ProductRequest $request
+     * @return \Illuminate\Http\RedirectResponse
      */
-    public function store(Request $request)
+    public function store(ProductRequest $request)
     {
-        //
+        $product = Product::create($request->all());
+
+        $product->categories()->sync($request->categories);
+
+        $images = $this->createImageFiles($request);
+        $product->images()->createMany($images);
+
+        $request->session()->flash('status', 'Product was created successfully!');
+
+        return redirect()->route('products');
     }
 
     /**
@@ -53,34 +72,52 @@ class ProductController extends Controller
     /**
      * Show the form for editing the specified resource.
      *
-     * @param  int  $id
+     * @param Product $product
      * @return \Illuminate\Http\Response
      */
-    public function edit($id)
+    public function edit(Product $product)
     {
-        //
+        $categories = Category::all()->pluck('name', 'id');
+
+        return view('pages.products.edit', compact('product', 'categories'));
     }
 
     /**
      * Update the specified resource in storage.
      *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
+     * @param ProductRequest $request
+     * @param Product $product
+     * @return \Illuminate\Http\RedirectResponse
      */
-    public function update(Request $request, $id)
+    public function update(ProductRequest $request, Product $product)
     {
-        //
+        $product->update($request->all());
+        $product->categories()->sync($request->categories);
+
+        $product->discount()->delete();
+        $product->discount()->createMany($request->discounts);
+
+        $images = $this->createImageFiles($request);
+        $product->images()->createMany($images);
+
+        $request->session()->flash('status', 'Product was updated successfully!');
+
+        return redirect()->back();
     }
 
     /**
      * Remove the specified resource from storage.
      *
-     * @param  int  $id
+     * @param Product $product
      * @return \Illuminate\Http\Response
+     * @throws \Exception
      */
-    public function destroy($id)
+    public function destroy(Product $product)
     {
-        //
+        $product->delete();
+
+        return redirect()->route('products');
     }
+
+
 }

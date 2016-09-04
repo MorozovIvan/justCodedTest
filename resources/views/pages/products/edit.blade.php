@@ -17,7 +17,7 @@
     @endif
 
 
-    <h2>Create Product</h2>
+    <h2>Edit Product</h2>
 
     @include('partials.form.product')
 @stop

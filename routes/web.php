@@ -38,6 +38,15 @@ Route::group(['prefix' => 'products'], function () {
 
     Route::get('/create', 'ProductController@create')->name('product_create');
 
+    Route::post('/create', 'ProductController@store')->name('product_create');
+
+    Route::get('/{product}/edit', 'ProductController@edit')->name('product_edit');
+
+    Route::put('/{product}/edit', 'ProductController@update')->name('product_edit');
+
+    Route::delete('/{product}/delete', 'ProductController@destroy')->name('product_delete');
+
+    Route::get('/images/{image}/delete', 'ProductController@imageDelete')->name('image_delete');
 
 });
 

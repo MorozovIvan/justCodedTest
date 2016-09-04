@@ -14,16 +14,16 @@ class Product extends Model
      */
     public function categories()
     {
-        return $this->belongsToMany('App\Models\Category');
+        return $this->belongsToMany('App\Models\Category', 'product_categories');
     }
 
 
     /**
-     * @return \Illuminate\Database\Eloquent\Relations\HasOne
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
      */
     public function discount()
     {
-        return $this->hasOne('App\Models\ProductDiscount');
+        return $this->HasMany('App\Models\ProductDiscount');
     }
 
 

@@ -16,3 +16,10 @@ use Illuminate\Http\Request;
 Route::get('/user', function (Request $request) {
     return $request->user();
 })->middleware('auth:api');
+
+
+Route::get('/products/{product}', function (\App\Models\Product $product) {
+    $product->with('categories', 'images', 'discount');
+
+    return $product;
+});
